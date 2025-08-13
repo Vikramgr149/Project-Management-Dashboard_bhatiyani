@@ -1,34 +1,160 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/**
+ * Global styles for the Project Management Dashboard
+ * 
+ * This file contains global styles and Tailwind base styles
+ * for the project management application.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global app styles */
+.App {
+  @apply min-h-screen bg-background;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+::-webkit-scrollbar-track {
+  @apply bg-muted;
 }
 
-.App-link {
-    color: #61dafb;
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* React Flow specific styles */
+.react-flow__attribution {
+  @apply hidden;
+}
+
+.react-flow__node {
+  @apply font-sans;
+}
+
+/* Chart.js responsive container */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+/* Custom component styles */
+.sidebar-nav {
+  @apply space-y-2;
+}
+
+.sidebar-nav a {
+  @apply flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.sidebar-nav a.active {
+  @apply bg-primary text-primary-foreground;
+}
+
+.sidebar-nav a:not(.active) {
+  @apply text-muted-foreground hover:bg-muted hover:text-foreground;
+}
+
+/* Project and task card styles */
+.project-card, .task-card {
+  @apply transition-all duration-200 hover:shadow-lg;
+}
+
+/* Status badge styles */
+.status-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.status-badge.planning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-badge.in-progress {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-badge.on-hold {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-badge.completed {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-badge.cancelled {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-badge.todo {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.status-badge.review {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-badge.done {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Priority badge styles */
+.priority-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.priority-badge.low {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.priority-badge.medium {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.priority-badge.high {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.priority-badge.critical {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Loading states */
+.loading-spinner {
+  @apply animate-spin rounded-full border-2 border-muted border-t-primary;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .desktop-only {
+    @apply hidden;
+  }
+  
+  .mobile-responsive {
+    @apply px-4;
+  }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Focus styles for accessibility */
+.focus-outline {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
 }

@@ -1,51 +1,57 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+/**
+ * Main Application Component - Project Management Dashboard
+ * 
+ * This is the main component that handles routing and provides the overall
+ * structure for the project management dashboard application.
+ * Uses React Router for navigation and includes multiple views.
+ * 
+ * Features:
+ * - Dashboard with analytics
+ * - Project management
+ * - Task management  
+ * - React Flow workflow visualization
+ * - Chart.js analytics
+ */
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import './App.css';
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+// Import components
+import Layout from './components/Layout';
+import Dashboard from './components/Dashboard';
+import Projects from './components/Projects';
+import Tasks from './components/Tasks';
+import Analytics from './components/Analytics';
+import WorkflowView from './components/WorkflowView';
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
+/**
+ * Main App component that sets up routing and provides global structure
+ * @returns {JSX.Element} The main application component
+ */
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <Layout>
+          <Routes>
+            {/* Redirect root to dashboard */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            
+            {/* Main application routes */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/workflow/:projectId" element={<WorkflowView />} />
+            
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Layout>
+        {/* Global toast notifications */}
+        <Toaster position="top-right" richColors />
       </BrowserRouter>
     </div>
   );
