@@ -571,10 +571,18 @@ def generate_recommendations(project: Dict[str, Any], tasks: List[Dict[str, Any]
     if high_priority_tasks > 0:
         recommendations.append(f"You have {high_priority_tasks} high-priority tasks that need attention")
     
-    # Check for overdue tasks
-    overdue_tasks = [t for t in tasks if t.get("due_date") and 
-                    datetime.fromisoformat(t["due_date"].replace('Z', '+00:00')) < datetime.utcnow() and 
-                    t["status"] != TaskStatus.DONE.value]
+    # Check for overdue tasks with better error handling
+    overdue_tasks = []
+    try:
+        for t in tasks:
+            if t.get("due_date") and t["status"] != TaskStatus.DONE.value:
+                due_date_str = t["due_date"]
+                if isinstance(due_date_str, str):
+                    due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00'))
+                    if due_date < datetime.utcnow():
+                        overdue_tasks.append(t)
+    except (ValueError, TypeError) as e:
+        logging.warning(f"Error checking overdue tasks: {e}")
     
     if overdue_tasks:
         recommendations.append(f"Address {len(overdue_tasks)} overdue tasks to keep project on track")
