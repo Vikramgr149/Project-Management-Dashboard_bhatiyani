@@ -577,11 +577,18 @@ def identify_risk_factors(project: Dict[str, Any], tasks: List[Dict[str, Any]]) 
     
     # Check project timeline
     if project.get("end_date"):
-        end_date = datetime.fromisoformat(project["end_date"].replace('Z', '+00:00'))
-        if end_date < datetime.utcnow():
-            risks.append("Project deadline has passed")
-        elif (end_date - datetime.utcnow()).days < 7:
-            risks.append("Project deadline is approaching within a week")
+        try:
+            if isinstance(project["end_date"], str):
+                end_date = datetime.fromisoformat(project["end_date"].replace('Z', '+00:00'))
+            else:
+                end_date = project["end_date"]
+            
+            if end_date < datetime.utcnow():
+                risks.append("Project deadline has passed")
+            elif (end_date - datetime.utcnow()).days < 7:
+                risks.append("Project deadline is approaching within a week")
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Error parsing end_date: {e}")
     
     # Check task distribution
     if tasks:
@@ -591,13 +598,25 @@ def identify_risk_factors(project: Dict[str, Any], tasks: List[Dict[str, Any]]) 
     
     # Check progress vs time
     progress = project.get("progress", 0)
-    if progress < 50 and project.get("end_date"):
-        end_date = datetime.fromisoformat(project["end_date"].replace('Z', '+00:00'))
-        time_passed = (datetime.utcnow() - datetime.fromisoformat(project["created_at"].replace('Z', '+00:00'))).days
-        total_time = (end_date - datetime.fromisoformat(project["created_at"].replace('Z', '+00:00'))).days
-        
-        if total_time > 0 and time_passed / total_time > 0.5:
-            risks.append("Project progress is behind schedule")
+    if progress < 50 and project.get("end_date") and project.get("created_at"):
+        try:
+            if isinstance(project["end_date"], str):
+                end_date = datetime.fromisoformat(project["end_date"].replace('Z', '+00:00'))
+            else:
+                end_date = project["end_date"]
+                
+            if isinstance(project["created_at"], str):
+                created_date = datetime.fromisoformat(project["created_at"].replace('Z', '+00:00'))
+            else:
+                created_date = project["created_at"]
+            
+            time_passed = (datetime.utcnow() - created_date).days
+            total_time = (end_date - created_date).days
+            
+            if total_time > 0 and time_passed / total_time > 0.5:
+                risks.append("Project progress is behind schedule")
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Error calculating project timeline: {e}")
     
     return risks
 
@@ -618,13 +637,21 @@ def predict_completion_date(project: Dict[str, Any], tasks: List[Dict[str, Any]]
         return "Project completed"
     
     # Estimate remaining time based on time per completed task
-    project_age = (datetime.utcnow() - datetime.fromisoformat(project["created_at"].replace('Z', '+00:00'))).days
-    if project_age > 0:
-        days_per_task = project_age / completed_tasks
-        remaining_tasks = total_tasks - completed_tasks
-        estimated_days = remaining_tasks * days_per_task
-        estimated_completion = datetime.utcnow() + timedelta(days=estimated_days)
-        return estimated_completion.strftime("%Y-%m-%d")
+    try:
+        if isinstance(project.get("created_at"), str):
+            created_date = datetime.fromisoformat(project["created_at"].replace('Z', '+00:00'))
+        else:
+            created_date = project.get("created_at", datetime.utcnow())
+            
+        project_age = (datetime.utcnow() - created_date).days
+        if project_age > 0:
+            days_per_task = project_age / completed_tasks
+            remaining_tasks = total_tasks - completed_tasks
+            estimated_days = remaining_tasks * days_per_task
+            estimated_completion = datetime.utcnow() + timedelta(days=estimated_days)
+            return estimated_completion.strftime("%Y-%m-%d")
+    except (ValueError, TypeError) as e:
+        logging.warning(f"Error predicting completion date: {e}")
     
     return "Cannot predict completion date"
 
