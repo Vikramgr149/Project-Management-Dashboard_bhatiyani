@@ -523,9 +523,19 @@ def calculate_project_health(project: Dict[str, Any], tasks: List[Dict[str, Any]
     
     total_tasks = len(tasks)
     completed_tasks = len([t for t in tasks if t["status"] == TaskStatus.DONE.value])
-    overdue_tasks = len([t for t in tasks if t.get("due_date") and 
-                        datetime.fromisoformat(t["due_date"].replace('Z', '+00:00')) < datetime.utcnow() and 
-                        t["status"] != TaskStatus.DONE.value])
+    
+    # Safely calculate overdue tasks
+    overdue_tasks = 0
+    try:
+        for t in tasks:
+            if t.get("due_date") and t["status"] != TaskStatus.DONE.value:
+                due_date_str = t["due_date"]
+                if isinstance(due_date_str, str):
+                    due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00'))
+                    if due_date < datetime.utcnow():
+                        overdue_tasks += 1
+    except (ValueError, TypeError) as e:
+        logging.warning(f"Error calculating overdue tasks: {e}")
     
     completion_rate = completed_tasks / total_tasks if total_tasks > 0 else 0
     overdue_rate = overdue_tasks / total_tasks if total_tasks > 0 else 0
